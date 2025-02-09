@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --input-background: #171717;
+  --input-border: #262626;
+  --primary: #3b82f6;
+  --secondary: #a3a3a3;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: "ss01", "ss02", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, textarea, select {
+  background-color: var(--input-background) !important;
+  color: var(--foreground) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Modern scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 20px;
+}
+
+/* Subtle selection highlight */
+::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: #fff;
+}
+
+/* Smooth transitions for interactive elements */
+a, button, input, textarea {
+  transition: all 0.2s ease-in-out;
+}
