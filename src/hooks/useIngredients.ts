@@ -34,6 +34,7 @@ export function useIngredients() {
       setIngredients(prev => [...prev, newIngredient])
       return newIngredient
     } catch (err) {
+      console.error('Error adding ingredient:', err)
       throw new Error('Failed to add ingredient')
     }
   }

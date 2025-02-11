@@ -34,6 +34,7 @@ export function useSymptoms() {
       setSymptoms(prev => [...prev, newSymptom])
       return newSymptom
     } catch (err) {
+      console.error('Error adding symptom:', err)
       throw new Error('Failed to add symptom')
     }
   }

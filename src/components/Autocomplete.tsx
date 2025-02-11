@@ -134,7 +134,7 @@ export function Autocomplete<T>({
                 onMouseEnter={() => setHighlightedIndex(items.length)}
               >
                 <div className="flex items-center justify-between">
-                  <span>Add "{value}"</span>
+                  <span>Add &quot;{value}&quot;</span>
                   <span className="text-xs text-dark-secondary opacity-0 group-hover:opacity-100 transition-opacity">
                     Create
                   </span>
