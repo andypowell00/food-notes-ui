@@ -2,25 +2,17 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateEntrySymptomNotes, removeEntrySymptom } from '@/lib/api'
 
-type RouteParams = {
-  params: {
-    entryId: string, 
-    symptomId: string
-  }
-}
-
 export async function PUT(
-  request: NextRequest, 
-  context: RouteParams
+  request: NextRequest,
+  { params }: { params: { entryId: string; symptomId: string } }
 ) {
   try {
-    const entryId = parseInt(context.params.entryId, 10)
-    const symptomId = parseInt(context.params.symptomId, 10)
+    const entryId = parseInt(params.entryId, 10)
+    const symptomId = parseInt(params.symptomId, 10)
     const { notes } = await request.json()
     
     const updatedSymptom = await updateEntrySymptomNotes(entryId, symptomId, notes)
     
-    // Ensure a valid JSON response is always returned
     return NextResponse.json({
       id: updatedSymptom.symptomId,
       entryId: updatedSymptom.entryId,
@@ -37,12 +29,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest, 
-  context: RouteParams
+  request: NextRequest,
+  { params }: { params: { entryId: string; symptomId: string } }
 ) {
   try {
-    const entryId = parseInt(context.params.entryId, 10)
-    const symptomId = parseInt(context.params.symptomId, 10)
+    const entryId = parseInt(params.entryId, 10)
+    const symptomId = parseInt(params.symptomId, 10)
     
     await removeEntrySymptom(entryId, symptomId)
     return new NextResponse(null, { status: 204 })
