@@ -2,18 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateEntryIngredientNotes, deleteEntryIngredient } from '@/lib/api'
 
-type Params = {
-  entryId: string;
-  ingredientId: string;
-}
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<{ entryId: string; ingredientId: string }> }  
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const ingredientId = parseInt(params.ingredientId, 10)
+    const entryId = parseInt((await params).entryId, 10)
+    const ingredientId = parseInt((await params).ingredientId, 10)
     const { notes } = await request.json()
     
     const updatedIngredient = await updateEntryIngredientNotes(entryId, ingredientId, notes)
@@ -35,11 +31,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Params }  
+  { params }: { params: Promise<{ entryId: string; ingredientId: string }> }
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const ingredientId = parseInt(params.ingredientId, 10)
+    const entryId = parseInt((await params).entryId, 10)
+    const ingredientId = parseInt((await params).ingredientId, 10)
     
     await deleteEntryIngredient(entryId, ingredientId)
     return new NextResponse(null, { status: 204 })

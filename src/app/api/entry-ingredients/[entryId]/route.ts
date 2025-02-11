@@ -2,16 +2,12 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getEntryIngredients, addEntryIngredient, deleteEntryIngredient } from '@/lib/api'
 
-type Params = {
-  entryId: string;
-  ingredientId: string;
-}
 export async function GET(
   request: NextRequest,
-  { params }: { params: { entryId: string } }
+  { params }: { params: Promise<{ entryId: string; ingredientId: string }> }
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
+    const entryId = parseInt((await params).entryId, 10)
     const ingredients = await getEntryIngredients(entryId)
     return NextResponse.json(ingredients)
   } catch (error) {
@@ -22,10 +18,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<{ entryId: string; ingredientId: string }> }
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
+    const entryId = parseInt((await params).entryId, 10)
     const { ingredientId } = await request.json()
     const ingredient = await addEntryIngredient(entryId, ingredientId)
     return NextResponse.json(ingredient)
@@ -37,11 +33,11 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<{ entryId: string; ingredientId: string }> }
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const ingredientId = parseInt(params.ingredientId, 10)
+    const entryId = parseInt((await params).entryId, 10)
+    const ingredientId = parseInt((await params).ingredientId, 10)
     await deleteEntryIngredient(entryId, ingredientId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {

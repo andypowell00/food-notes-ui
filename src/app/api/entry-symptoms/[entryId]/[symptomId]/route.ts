@@ -4,11 +4,11 @@ import { updateEntrySymptomNotes, removeEntrySymptom } from '@/lib/api'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { entryId: string; symptomId: string } }
+  { params }: { params: Promise<{ entryId: string; symptomId: string }> }
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const symptomId = parseInt(params.symptomId, 10)
+    const entryId = parseInt((await params).entryId, 10)
+    const symptomId = parseInt((await params).symptomId, 10)
     const { notes } = await request.json()
     
     const updatedSymptom = await updateEntrySymptomNotes(entryId, symptomId, notes)
@@ -30,11 +30,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { entryId: string; symptomId: string } }
+  { params }: { params: Promise<{ entryId: string; symptomId: string }> }
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const symptomId = parseInt(params.symptomId, 10)
+    const entryId = parseInt((await params).entryId, 10)
+    const symptomId = parseInt((await params).symptomId, 10)
     
     await removeEntrySymptom(entryId, symptomId)
     return new NextResponse(null, { status: 204 })
