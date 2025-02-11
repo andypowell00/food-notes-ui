@@ -2,13 +2,20 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateEntrySymptomNotes, removeEntrySymptom } from '@/lib/api'
 
+type RouteParams = {
+  params: {
+    entryId: string, 
+    symptomId: string
+  }
+}
+
 export async function PUT(
   request: NextRequest, 
-  { params }: { params: { entryId: string, symptomId: string } }
+  context: RouteParams
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const symptomId = parseInt(params.symptomId, 10)
+    const entryId = parseInt(context.params.entryId, 10)
+    const symptomId = parseInt(context.params.symptomId, 10)
     const { notes } = await request.json()
     
     const updatedSymptom = await updateEntrySymptomNotes(entryId, symptomId, notes)
@@ -31,11 +38,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest, 
-  { params }: { params: { entryId: string, symptomId: string } }
+  context: RouteParams
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const symptomId = parseInt(params.symptomId, 10)
+    const entryId = parseInt(context.params.entryId, 10)
+    const symptomId = parseInt(context.params.symptomId, 10)
     
     await removeEntrySymptom(entryId, symptomId)
     return new NextResponse(null, { status: 204 })

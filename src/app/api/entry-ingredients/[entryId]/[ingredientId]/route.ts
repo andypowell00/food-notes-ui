@@ -2,13 +2,20 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateEntryIngredientNotes, deleteEntryIngredient } from '@/lib/api'
 
+type RouteParams = {
+  params: {
+    entryId: string, 
+    ingredientId: string
+  }
+}
+
 export async function PUT(
   request: NextRequest, 
-  { params }: { params: { entryId: string, ingredientId: string } }
+  context: RouteParams
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const ingredientId = parseInt(params.ingredientId, 10)
+    const entryId = parseInt(context.params.entryId, 10)
+    const ingredientId = parseInt(context.params.ingredientId, 10)
     const { notes } = await request.json()
     
     const updatedIngredient = await updateEntryIngredientNotes(entryId, ingredientId, notes)
@@ -31,11 +38,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest, 
-  { params }: { params: { entryId: string, ingredientId: string } }
+  context: RouteParams
 ) {
   try {
-    const entryId = parseInt(params.entryId, 10)
-    const ingredientId = parseInt(params.ingredientId, 10)
+    const entryId = parseInt(context.params.entryId, 10)
+    const ingredientId = parseInt(context.params.ingredientId, 10)
     
     await deleteEntryIngredient(entryId, ingredientId)
     return new NextResponse(null, { status: 204 })
