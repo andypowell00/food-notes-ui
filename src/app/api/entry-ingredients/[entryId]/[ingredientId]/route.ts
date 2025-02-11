@@ -2,9 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateEntryIngredientNotes, deleteEntryIngredient } from '@/lib/api'
 
+type Params = {
+  entryId: string;
+  ingredientId: string;
+}
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { entryId: string; ingredientId: string } }
+  { params }: { params: Params }
 ) {
   try {
     const entryId = parseInt(params.entryId, 10)
@@ -30,7 +35,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { entryId: string; ingredientId: string } }
+  { params }: { params: Params }  
 ) {
   try {
     const entryId = parseInt(params.entryId, 10)

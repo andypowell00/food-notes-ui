@@ -18,3 +18,4 @@
 .env
 # testing
 /coverage
+.vercel

@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getEntryIngredients, addEntryIngredient, deleteEntryIngredient } from '@/lib/api'
 
+type Params = {
+  entryId: string;
+  ingredientId: string;
+}
 export async function GET(
   request: NextRequest,
-  { params }: { params: { entryId: string; ingredientId: string } }
+  { params }: { params: { entryId: string } }
 ) {
   try {
     const entryId = parseInt(params.entryId, 10)
@@ -18,7 +22,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { entryId: string; ingredientId: string } }
+  { params }: { params: Params }
 ) {
   try {
     const entryId = parseInt(params.entryId, 10)
@@ -33,7 +37,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { entryId: string; ingredientId: string } }
+  { params }: { params: Params }
 ) {
   try {
     const entryId = parseInt(params.entryId, 10)
