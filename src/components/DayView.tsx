@@ -116,7 +116,7 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
                 onAddNew={handleAddNewIngredient}
                 items={filteredIngredients}
                 getItemText={(item) => item.name}
-                placeholder="Add ingredients..."
+                placeholder="Add Food & Drink..."
                 label="Ingredient"
                 hideLabel={true}
               />
@@ -179,7 +179,7 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
                 onAddNew={handleAddNewSymptom}
                 items={filteredSymptoms}
                 getItemText={(item) => item.title}
-                placeholder="Add symptoms..."
+                placeholder="Add Symptoms..."
                 label="Symptom"
                 hideLabel={true}
               />

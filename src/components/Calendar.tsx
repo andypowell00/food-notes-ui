@@ -84,7 +84,7 @@ const Calendar: React.FC<CalendarProps> = ({ entries = [], onSelectDate, selecte
                 'aspect-square p-1 text-sm rounded-lg transition-colors relative',
                 !isSameMonth(day, currentMonth) && 'text-dark-secondary',
                 isSelected ? 'bg-accent text-white' : 'hover:bg-dark-hover',
-                !isSelected && isToday && 'text-accent',
+                !isSelected && isToday && 'text-accent border-2 border-accent/50',
                 isSymptomaticDay && 'bg-red-600/20 text-red-400',
                 isNonSymptomaticDay && 'bg-green-600/20 text-green-400',
                 'flex items-center justify-center'
