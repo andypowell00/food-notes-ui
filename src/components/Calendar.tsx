@@ -74,7 +74,7 @@ const Calendar: React.FC<CalendarProps> = ({ entries = [], onSelectDate, selecte
               (!entry.symptomatic)
           )
           const isSelected = selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-          const isToday = format(new Date(), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+          //const isToday = format(new Date(), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
 
           return (
             <button
@@ -83,10 +83,9 @@ const Calendar: React.FC<CalendarProps> = ({ entries = [], onSelectDate, selecte
               className={clsx(
                 'aspect-square p-1 text-sm rounded-lg transition-colors relative',
                 !isSameMonth(day, currentMonth) && 'text-dark-secondary',
-                isSelected ? 'bg-accent text-white' : 'hover:bg-dark-hover',
-                !isSelected && isToday && 'text-accent border-2 border-accent/50',
-                isSymptomaticDay && 'bg-red-600/20 text-red-400',
-                isNonSymptomaticDay && 'bg-green-600/20 text-green-400',
+                isSelected ? 'bg-accent text-white border-2 border-accent/50' : 'hover:bg-dark-hover',
+                isSymptomaticDay && 'bg-orange-600/20 text-orange-400',
+                isNonSymptomaticDay && 'bg-blue-600/20 text-blue-400',
                 'flex items-center justify-center'
               )}
             >

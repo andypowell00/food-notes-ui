@@ -1,4 +1,4 @@
-import type { Entry, Ingredient, Symptom, EntryIngredient, EntrySymptom } from "@/types"
+import type { Entry, Ingredient, Symptom, EntryIngredient, EntrySymptom, Supplement, EntrySupplement } from "@/types"
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
@@ -141,6 +141,101 @@ export async function createIngredient(name: string): Promise<Ingredient> {
   const response = await fetchWithApiKey(`${API_BASE_URL}/ingredients`, {
     method: 'POST',
     body: JSON.stringify({ name }),
+  })
+  return handleResponse(response)
+}
+
+// Supplements API methods
+export async function getSupplements(): Promise<Supplement[]> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/supplements`)
+  return handleResponse(response)
+}
+
+export async function createSupplement(name: string): Promise<Supplement> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/supplements`, {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+  return handleResponse(response)
+}
+
+export async function getSupplement(id: number): Promise<Supplement> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/supplements/${id}`)
+  return handleResponse(response)
+}
+
+export async function deleteSupplement(id: number): Promise<void> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/supplements/${id}`, {
+    method: 'DELETE',
+  })
+  return handleResponse(response)
+}
+
+// Entry Supplements API methods
+export async function getEntrySupplements(entryId: number): Promise<EntrySupplement[]> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/entry-supplements/by-entry/${entryId}`)
+  return handleResponse(response)
+}
+
+export async function addEntrySupplement(
+  entryId: number,
+  supplementId: number
+): Promise<EntrySupplement> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/entry-supplements`, {
+    method: 'POST',
+    body: JSON.stringify({ 
+      entryId,
+      supplementId
+    }),
+  })
+  return handleResponse(response)
+}
+
+export async function removeEntrySupplement(entryId: number, supplementId: number): Promise<void> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/entry-supplements/${entryId}/${supplementId}`, {
+    method: 'DELETE',
+  })
+  return handleResponse(response)
+}
+
+// Safe Ingredients API methods
+export async function getSafeIngredients(): Promise<Ingredient[]> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/safe-ingredients`)
+  return handleResponse(response)
+}
+
+export async function markIngredientAsSafe(ingredientId: number): Promise<void> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/safe-ingredients`, {
+    method: 'POST',
+    body: JSON.stringify({ ingredientId }),
+  })
+  return handleResponse(response)
+}
+
+export async function removeSafeIngredient(ingredientId: number): Promise<void> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/safe-ingredients/${ingredientId}`, {
+    method: 'DELETE',
+  })
+  return handleResponse(response)
+}
+
+// Unsafe Ingredients API methods
+export async function getUnsafeIngredients(): Promise<Ingredient[]> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/unsafe-ingredients`)
+  return handleResponse(response)
+}
+
+export async function markIngredientAsUnsafe(ingredientId: number): Promise<void> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/unsafe-ingredients`, {
+    method: 'POST',
+    body: JSON.stringify({ ingredientId }),
+  })
+  return handleResponse(response)
+}
+
+export async function removeUnsafeIngredient(ingredientId: number): Promise<void> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/unsafe-ingredients/${ingredientId}`, {
+    method: 'DELETE',
   })
   return handleResponse(response)
 }

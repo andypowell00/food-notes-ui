@@ -2,6 +2,7 @@ export interface Entry {
   id: number
   date: string
   symptomatic: boolean
+  supplements?: EntrySupplement[]
 }
 
 export interface Ingredient {
@@ -24,4 +25,15 @@ export interface EntrySymptom {
   entryId: number
   symptomId: number
   notes: string
+}
+
+export interface Supplement {
+  id: number
+  name: string
+}
+
+export interface EntrySupplement {
+  entryId: number
+  supplementId: number
+  supplementName?: string
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import DayView from '@/components/DayView'
 import Calendar from '@/components/Calendar'
+import SafeUnsafeIngredients from '@/components/SafeUnsafeIngredients'
 import type { Entry } from "@/types"
 import { createEntry, getEntries } from "@/lib/api"
 
@@ -49,12 +50,17 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-4">
-              <div className="bg-dark-surface rounded-xl shadow-soft p-4">
-                <Calendar 
-                  entries={entries}
-                  selectedDate={selectedDate}
-                  onSelectDate={setSelectedDate}
-                />
+              <div className="space-y-8">
+                <div className="bg-dark-surface rounded-xl shadow-soft p-4">
+                  <Calendar 
+                    entries={entries}
+                    selectedDate={selectedDate}
+                    onSelectDate={setSelectedDate}
+                  />
+                </div>
+                <div className="bg-dark-surface rounded-xl shadow-soft p-6">
+                  <SafeUnsafeIngredients />
+                </div>
               </div>
             </div>
             <div className="lg:col-span-8">

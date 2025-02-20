@@ -18,8 +18,8 @@ export function useIngredients() {
         setIngredients(data)
         setError(null)
       } catch (err) {
-        setError('Failed to load ingredients')
-        console.error('Error loading ingredients:', err)
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+        setError('Failed to load ingredients: ' + errorMessage)
       } finally {
         setIsLoading(false)
       }
@@ -34,8 +34,8 @@ export function useIngredients() {
       setIngredients(prev => [...prev, newIngredient])
       return newIngredient
     } catch (err) {
-      console.error('Error adding ingredient:', err)
-      throw new Error('Failed to add ingredient')
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      throw new Error('Failed to add ingredient: ' + errorMessage)
     }
   }
 

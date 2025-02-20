@@ -31,6 +31,16 @@ export function Autocomplete<T>({
   const [highlightedIndex, setHighlightedIndex] = React.useState(-1)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Filter items based on search term
+  const filteredItems = items.filter(item => 
+    getItemText(item).toLowerCase().includes(value.toLowerCase())
+  )
+
+  const showAddNew = value.trim() !== '' && 
+    !filteredItems.some(item => 
+      getItemText(item).toLowerCase() === value.toLowerCase()
+    )
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -45,16 +55,18 @@ export function Autocomplete<T>({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setHighlightedIndex(prev => Math.min(prev + 1, items.length))
+      setHighlightedIndex(prev => 
+        Math.min(prev + 1, filteredItems.length + (showAddNew ? 0 : -1))
+      )
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setHighlightedIndex(prev => Math.max(prev - 1, -1))
-    } else if (e.key === 'Enter') {
+    } else if (e.key === 'Enter' && highlightedIndex !== -1) {
       e.preventDefault()
-      if (highlightedIndex === items.length) {
+      if (highlightedIndex === filteredItems.length) {
         onAddNew(value)
-      } else if (highlightedIndex >= 0 && items[highlightedIndex]) {
-        onSelect(items[highlightedIndex])
+      } else {
+        onSelect(filteredItems[highlightedIndex])
       }
       setIsOpen(false)
     } else if (e.key === 'Escape') {
@@ -64,19 +76,19 @@ export function Autocomplete<T>({
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {!hideLabel && (
-        <label 
-          htmlFor={id} 
-          className="block text-xs font-medium text-dark-secondary uppercase tracking-wider mb-2 animate-fade-in"
-        >
-          {label}
-        </label>
-      )}
+      <label
+        htmlFor={id}
+        className={`block text-sm font-medium text-dark-primary mb-1 ${
+          hideLabel ? 'sr-only' : ''
+        }`}
+      >
+        {label}
+      </label>
       <input
         type="text"
         id={id}
         value={value}
-        onChange={e => {
+        onChange={(e) => {
           onChange(e.target.value)
           setIsOpen(true)
           setHighlightedIndex(-1)
@@ -89,10 +101,10 @@ export function Autocomplete<T>({
         hover:border-dark-border/30"
         placeholder={placeholder}
       />
-      {isOpen && (value.trim() !== '' || items.length > 0) && (
+      {isOpen && (value.trim() !== '' || filteredItems.length > 0) && (
         <div className="absolute z-10 mt-2 w-full rounded-xl bg-dark-surface shadow-medium border border-dark-border/10 overflow-hidden animate-slide-up">
           <ul className="max-h-60 py-1.5 text-sm overflow-auto focus:outline-none">
-            {items.map((item, index) => (
+            {filteredItems.map((item, index) => (
               <li
                 key={getItemText(item)}
                 className={`cursor-pointer select-none relative px-4 py-3
@@ -117,10 +129,10 @@ export function Autocomplete<T>({
                 </div>
               </li>
             ))}
-            {value.trim() !== '' && (
+            {showAddNew && (
               <li
                 className={`cursor-pointer select-none relative px-4 py-3
-                  ${items.length === highlightedIndex 
+                  ${filteredItems.length === highlightedIndex 
                     ? 'bg-primary-700 text-white' 
                     : 'text-dark-primary hover:bg-dark-elevated'}
                   transition-colors duration-200 ease-in-out
@@ -131,12 +143,12 @@ export function Autocomplete<T>({
                   onAddNew(value)
                   setIsOpen(false)
                 }}
-                onMouseEnter={() => setHighlightedIndex(items.length)}
+                onMouseEnter={() => setHighlightedIndex(filteredItems.length)}
               >
                 <div className="flex items-center justify-between">
                   <span>Add &quot;{value}&quot;</span>
                   <span className="text-xs text-dark-secondary opacity-0 group-hover:opacity-100 transition-opacity">
-                    Create
+                    Create New
                   </span>
                 </div>
               </li>
