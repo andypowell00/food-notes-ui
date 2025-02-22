@@ -21,7 +21,7 @@ export default function SafeUnsafeIngredients() {
     }
 
     return (
-      <div className="space-y-2">
+      <div className={`space-y-2 ${ingredients.length > 10 ? 'max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-dark-elevated scrollbar-track-dark-base' : ''}`}>
         {ingredients.map((ingredient) => {
           return (
             <div

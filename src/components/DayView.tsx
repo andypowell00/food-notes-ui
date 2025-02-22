@@ -142,7 +142,7 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
                 label="Ingredient"
                 hideLabel={true}
               />
-              <div className="space-y-2">
+              <div className={`space-y-2 ${entryIngredients.length > 10 ? 'max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-dark-elevated scrollbar-track-dark-base' : ''}`}>
                 {entryIngredients.map((ei) => {
                   const ingredient = ingredients.find((i) => i.id === ei.ingredientId)
                   if (!ingredient?.name) return null
