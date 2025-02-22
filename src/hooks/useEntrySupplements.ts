@@ -13,7 +13,7 @@ export function useEntrySupplements(entryId?: number) {
       setIsLoading(true)
       try {
         const data = await api.getEntrySupplements(entryId)
-        setEntrySupplements(data)
+        setEntrySupplements(data || [])
         setError(null)
       } catch (err) {
         setError('Failed to load supplements')
@@ -30,7 +30,7 @@ export function useEntrySupplements(entryId?: number) {
     if (!entryId) return
     try {
       const newEntrySupplement = await api.addEntrySupplement(entryId, supplementId)
-      setEntrySupplements(prev => [...prev, newEntrySupplement])
+      setEntrySupplements(prev => Array.isArray(prev) ? [...prev, newEntrySupplement] : [newEntrySupplement])
       setError(null)
     } catch (err) {
       setError('Failed to add supplement')
@@ -43,7 +43,7 @@ export function useEntrySupplements(entryId?: number) {
     if (!entryId) return
     try {
       await api.removeEntrySupplement(entryId, supplementId)
-      setEntrySupplements(prev => prev.filter(es => es.supplementId !== supplementId))
+      setEntrySupplements(prev => Array.isArray(prev) ? prev.filter(es => es.supplementId !== supplementId) : [])
       setError(null)
     } catch (err) {
       setError('Failed to remove supplement')
