@@ -26,27 +26,39 @@ export function useSafeUnsafeIngredients() {
           api.getUnsafeIngredients()
         ])
 
-        // Helper to process response that could be either format
-        const processResponse = (response: unknown): Ingredient[] => {
-          if (!Array.isArray(response)) return []
-          if (response.length === 0) return []
-          
-          // Check if it's the nested format
-          if ('ingredient' in response[0]) {
-            return (response as SafeUnsafeIngredientResponse[])
-              .map(item => item.ingredient)
-              .filter((ing, index, self) => 
-                index === self.findIndex(i => i.id === ing.id)
-              )
+        // Check for API errors
+        if (safeResponse.error) {
+          handleError(safeResponse.error, 'Error loading safe ingredients')
+          setError('Failed to load safe ingredients')
+        } else if (unsafeResponse.error) {
+          handleError(unsafeResponse.error, 'Error loading unsafe ingredients')
+          setError('Failed to load unsafe ingredients')
+        } else {
+          // Helper to process response that could be either format
+          const processResponse = (response: { data?: Ingredient[] | SafeUnsafeIngredientResponse[] }): Ingredient[] => {
+            if (!response || !response.data) return []
+            const data = response.data
+            
+            if (!Array.isArray(data)) return []
+            if (data.length === 0) return []
+            
+            // Check if it's the nested format
+            if (data.length > 0 && 'ingredient' in data[0]) {
+              return (data as SafeUnsafeIngredientResponse[])
+                .map(item => item.ingredient)
+                .filter((ing, index, self) => 
+                  index === self.findIndex(i => i.id === ing.id)
+                )
+            }
+            
+            // It's already Ingredient[]
+            return data as Ingredient[]
           }
-          
-          // It's already Ingredient[]
-          return response as Ingredient[]
-        }
 
-        setSafeIngredients(processResponse(safeResponse))
-        setUnsafeIngredients(processResponse(unsafeResponse))
-        setError(null)
+          setSafeIngredients(processResponse(safeResponse))
+          setUnsafeIngredients(processResponse(unsafeResponse))
+          setError(null)
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error'
         setError('Failed to load safe/unsafe ingredients')
