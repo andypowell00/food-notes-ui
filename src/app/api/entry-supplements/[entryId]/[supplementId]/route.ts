@@ -8,7 +8,12 @@ export async function DELETE(
 ) {
   try {
     const { entryId, supplementId } = await params
-    await api.removeEntrySupplement(parseInt(entryId), parseInt(supplementId))
+    const response = await api.removeEntrySupplement(parseInt(entryId), parseInt(supplementId))
+    
+    if (response.error) {
+      return NextResponse.json({ error: response.error }, { status: 400 })
+    }
+    
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Error removing entry supplement:', error)

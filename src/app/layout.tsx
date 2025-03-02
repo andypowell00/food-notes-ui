@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { Suspense } from 'react'
-import Providers from "./providers";
+import Providers from "@/app/providers";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -33,15 +33,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
       <body
         className={`${geist.className} antialiased dark:bg-dark-base dark:text-dark-primary text-sm leading-relaxed`}
       >
-        <Providers><Suspense>{children}</Suspense></Providers>
+        <Providers>
+          <Suspense>{children}</Suspense>
+        </Providers>
       </body>
     </html>
   );

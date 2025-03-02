@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Supplement } from '@/types'
 import * as api from '@/lib/api'
+import { handleError } from '@/lib/errorHandling'
 
 export function useSupplements() {
   const [supplements, setSupplements] = useState<Supplement[]>([])
@@ -12,12 +13,17 @@ export function useSupplements() {
     const loadSupplements = async () => {
       setIsLoading(true)
       try {
-        const data = await api.getSupplements()
-        setSupplements(data)
+        const response = await api.getSupplements()
+        if (response.error) {
+          setError('Failed to load supplements')
+          handleError(response.error, 'Failed to load supplements')
+          return
+        }
+        setSupplements(response.data || [])
         setError(null)
       } catch (err) {
         setError('Failed to load supplements')
-        console.error('Error loading supplements:', err)
+        handleError(err, 'Failed to load supplements')
       } finally {
         setIsLoading(false)
       }
@@ -28,24 +34,39 @@ export function useSupplements() {
 
   const addSupplement = async (name: string): Promise<Supplement> => {
     try {
-      const newSupplement = await api.createSupplement(name)
+      const response = await api.createSupplement(name)
+      if (response.error) {
+        handleError(response.error, 'Failed to add supplement')
+        // Return a default supplement to avoid breaking the UI
+        return { id: -1, name: name }
+      }
+      const newSupplement = response.data
+      if (!newSupplement) {
+        handleError(new Error('No data returned'), 'Failed to add supplement')
+        // Return a default supplement to avoid breaking the UI
+        return { id: -1, name: name }
+      }
       setSupplements(prev => [...prev, newSupplement])
       return newSupplement
     } catch (err) {
       setError('Failed to add supplement')
-      console.error('Error adding supplement:', err)
-      throw err
+      handleError(err, 'Failed to add supplement')
+      // Return a default supplement to avoid breaking the UI
+      return { id: -1, name: name }
     }
   }
 
   const deleteSupplement = async (id: number): Promise<void> => {
     try {
-      await api.deleteSupplement(id)
+      const response = await api.deleteSupplement(id)
+      if (response.error) {
+        handleError(response.error, 'Failed to delete supplement')
+        return
+      }
       setSupplements(prev => prev.filter(supplement => supplement.id !== id))
     } catch (err) {
       setError('Failed to delete supplement')
-      console.error('Error deleting supplement:', err)
-      throw err
+      handleError(err, 'Failed to delete supplement')
     }
   }
 

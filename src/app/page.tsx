@@ -6,6 +6,7 @@ import Calendar from '@/components/Calendar'
 import SafeUnsafeIngredients from '@/components/SafeUnsafeIngredients'
 import type { Entry } from "@/types"
 import { createEntry, getEntries } from "@/lib/api"
+import { handleError } from "@/lib/errorHandling"
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
@@ -15,10 +16,16 @@ export default function Home() {
   useEffect(() => {
     const loadEntries = async () => {
       try {
-        const data = await getEntries()
-        setEntries(data)
+        const response = await getEntries()
+        if (response.error) {
+          handleError(response.error, 'Failed to load entries')
+          setEntries([])
+        } else {
+          setEntries(response.data || [])
+        }
       } catch (error) {
-        console.error('Error loading entries:', error)
+        handleError(error, 'Failed to load entries')
+        setEntries([])
       } finally {
         setLoading(false)
       }
@@ -27,9 +34,20 @@ export default function Home() {
   }, [])
 
   const handleCreateEntry = async (date: Date) => {
-    const newEntry = await createEntry(date)
-    setEntries(prev => [...prev, newEntry])
-    return newEntry
+    try {
+      const response = await createEntry(date)
+      if (response.error) {
+        handleError(response.error, 'Failed to create entry')
+        return null
+      }
+      
+      const newEntry = response.data as Entry
+      setEntries(prev => [...prev, newEntry])
+      return newEntry
+    } catch (error) {
+      handleError(error, 'Failed to create entry')
+      return null
+    }
   }
 
   const currentEntry = selectedDate 

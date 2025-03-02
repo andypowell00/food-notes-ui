@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Ingredient } from '@/types'
 import * as api from '@/lib/api'
+import { handleError } from '@/lib/errorHandling'
 
 interface SafeUnsafeIngredientResponse {
   id: number
@@ -48,7 +49,8 @@ export function useSafeUnsafeIngredients() {
         setError(null)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-        setError('Failed to load safe/unsafe ingredients: ' + errorMessage)
+        setError('Failed to load safe/unsafe ingredients')
+        handleError(err, 'Failed to load safe/unsafe ingredients: ' + errorMessage)
       } finally {
         setIsLoading(false)
       }
@@ -67,7 +69,8 @@ export function useSafeUnsafeIngredients() {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      throw new Error('Failed to mark ingredient as safe: ' + errorMessage)
+      setError('Failed to mark ingredient as safe')
+      handleError(err, 'Failed to mark ingredient as safe: ' + errorMessage)
     }
   }
 
@@ -81,7 +84,8 @@ export function useSafeUnsafeIngredients() {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      throw new Error('Failed to mark ingredient as unsafe: ' + errorMessage)
+      setError('Failed to mark ingredient as unsafe')
+      handleError(err, 'Failed to mark ingredient as unsafe: ' + errorMessage)
     }
   }
 
@@ -91,7 +95,8 @@ export function useSafeUnsafeIngredients() {
       setSafeIngredients(prev => prev.filter(i => i.id !== ingredientId))
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      throw new Error('Failed to remove safe ingredient: ' + errorMessage)
+      setError('Failed to remove safe ingredient')
+      handleError(err, 'Failed to remove safe ingredient: ' + errorMessage)
     }
   }
 
@@ -101,7 +106,8 @@ export function useSafeUnsafeIngredients() {
       setUnsafeIngredients(prev => prev.filter(i => i.id !== ingredientId))
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      throw new Error('Failed to remove unsafe ingredient: ' + errorMessage)
+      setError('Failed to remove unsafe ingredient')
+      handleError(err, 'Failed to remove unsafe ingredient: ' + errorMessage)
     }
   }
 

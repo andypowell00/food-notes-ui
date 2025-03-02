@@ -11,13 +11,25 @@ export async function PUT(
     const symptomId = parseInt((await params).symptomId, 10)
     const { notes } = await request.json()
     
-    const updatedSymptom = await updateEntrySymptomNotes(entryId, symptomId, notes)
+    const response = await updateEntrySymptomNotes(entryId, symptomId, notes)
+    
+    if (response.error) {
+      return NextResponse.json({ 
+        error: response.error
+      }, { status: 400 })
+    }
+
+    if (!response.data) {
+      return NextResponse.json({ 
+        error: 'Failed to update symptom notes'
+      }, { status: 500 })
+    }
     
     return NextResponse.json({
-      id: updatedSymptom.symptomId,
-      entryId: updatedSymptom.entryId,
-      symptomId: updatedSymptom.symptomId,
-      notes: updatedSymptom.notes
+      id: response.data.symptomId,
+      entryId: response.data.entryId,
+      symptomId: response.data.symptomId,
+      notes: response.data.notes
     })
   } catch (error) {
     console.error('Error updating entry symptom notes:', error)
@@ -36,7 +48,12 @@ export async function DELETE(
     const entryId = parseInt((await params).entryId, 10)
     const symptomId = parseInt((await params).symptomId, 10)
     
-    await removeEntrySymptom(entryId, symptomId)
+    const response = await removeEntrySymptom(entryId, symptomId)
+    
+    if (response.error) {
+      return NextResponse.json({ error: response.error }, { status: 400 })
+    }
+    
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Error removing entry symptom:', error)

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import type { Ingredient } from '@/types'
 import * as api from '@/lib/api'
+import { handleError } from '@/lib/errorHandling'
 
 export function useIngredients() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([])
@@ -14,12 +15,17 @@ export function useIngredients() {
     const loadIngredients = async () => {
       setIsLoading(true)
       try {
-        const data = await api.getIngredients()
-        setIngredients(data)
-        setError(null)
+        const response = await api.getIngredients()
+        if (response.error) {
+          setError('Failed to load ingredients')
+          handleError(response.error, 'Failed to load ingredients')
+        } else {
+          setIngredients(response.data || [])
+          setError(null)
+        }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-        setError('Failed to load ingredients: ' + errorMessage)
+        setError('Failed to load ingredients')
+        handleError(err, 'Failed to load ingredients')
       } finally {
         setIsLoading(false)
       }
@@ -30,12 +36,20 @@ export function useIngredients() {
 
   const addIngredient = async (name: string): Promise<Ingredient> => {
     try {
-      const newIngredient = await api.createIngredient(name)
+      const response = await api.createIngredient(name)
+      if (response.error) {
+        handleError(response.error, 'Failed to add ingredient')
+        // Return a default ingredient to avoid breaking the UI
+        return { id: -1, name: name }
+      }
+      
+      const newIngredient = response.data as Ingredient
       setIngredients(prev => [...prev, newIngredient])
       return newIngredient
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      throw new Error('Failed to add ingredient: ' + errorMessage)
+      handleError(err, 'Failed to add ingredient')
+      // Return a default ingredient to avoid breaking the UI
+      return { id: -1, name: name }
     }
   }
 

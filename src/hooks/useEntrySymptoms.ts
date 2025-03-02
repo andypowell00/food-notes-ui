@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import * as api from '@/lib/api'
 import type { EntrySymptom } from '@/types'
 import { fetchWithApiKey, API_BASE_URL } from '@/lib/api'
+import { handleError } from '@/lib/errorHandling'
 
 export function useEntrySymptoms(entryId?: number) {
   const [entrySymptoms, setEntrySymptoms] = useState<EntrySymptom[]>([])
@@ -24,7 +25,10 @@ export function useEntrySymptoms(entryId?: number) {
         if (!response.ok) {
           const errorText = await response.text()
           console.error('Error response text:', errorText)
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+          const errorMessage = `HTTP error! status: ${response.status}, message: ${errorText}`
+          setError(errorMessage)
+          handleError(new Error(errorMessage), errorMessage)
+          return
         }
 
         // If response is empty or 204, set empty array
@@ -44,7 +48,7 @@ export function useEntrySymptoms(entryId?: number) {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load entry symptoms'
         setError(errorMessage)
-        console.error(errorMessage)
+        handleError(err, errorMessage)
       } finally {
         setIsLoading(false)
       }
@@ -57,12 +61,17 @@ export function useEntrySymptoms(entryId?: number) {
     if (!entryId) return
 
     try {
-      await api.addEntrySymptom(entryId, symptomId, notes)
+      const response = await api.addEntrySymptom(entryId, symptomId, notes)
+      if (response.error) {
+        setError('Failed to add symptom to entry')
+        handleError(response.error, 'Failed to add symptom to entry')
+        return
+      }
       setEntrySymptoms(prev => [...prev, { entryId, symptomId, notes }])
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add symptom to entry'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      setError('Failed to add symptom to entry')
+      handleError(err, errorMessage)
     }
   }
 
@@ -70,12 +79,17 @@ export function useEntrySymptoms(entryId?: number) {
     if (!entryId) return
 
     try {
-      await api.removeEntrySymptom(entryId, symptomId)
+      const response = await api.removeEntrySymptom(entryId, symptomId)
+      if (response.error) {
+        setError('Failed to remove symptom from entry')
+        handleError(response.error, 'Failed to remove symptom from entry')
+        return
+      }
       setEntrySymptoms(prev => prev.filter(es => es.symptomId !== symptomId))
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to remove symptom from entry'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      setError('Failed to remove symptom from entry')
+      handleError(err, errorMessage)
     }
   }
 
@@ -91,8 +105,10 @@ export function useEntrySymptoms(entryId?: number) {
       // Check if response is ok
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('Error response text:', errorText)
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+        const errorMessage = `HTTP error! status: ${response.status}, message: ${errorText}`
+        setError('Failed to update symptom notes')
+        handleError(new Error(errorMessage), 'Failed to update symptom notes')
+        return
       }
 
       // If response is a 204 No Content or similar, just update local state
@@ -115,9 +131,8 @@ export function useEntrySymptoms(entryId?: number) {
       return
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update symptom notes'
-      console.error('Full error:', err)
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      setError('Failed to update symptom notes')
+      handleError(err, errorMessage)
     }
   }
 

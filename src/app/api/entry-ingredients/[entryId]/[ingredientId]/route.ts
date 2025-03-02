@@ -12,13 +12,25 @@ export async function PUT(
     const ingredientId = parseInt((await params).ingredientId, 10)
     const { notes } = await request.json()
     
-    const updatedIngredient = await updateEntryIngredientNotes(entryId, ingredientId, notes)
+    const response = await updateEntryIngredientNotes(entryId, ingredientId, notes)
+    
+    if (response.error) {
+      return NextResponse.json({ 
+        error: response.error
+      }, { status: 400 })
+    }
+
+    if (!response.data) {
+      return NextResponse.json({ 
+        error: 'Failed to update ingredient notes'
+      }, { status: 500 })
+    }
     
     return NextResponse.json({
-      id: updatedIngredient.ingredientId,
-      entryId: updatedIngredient.entryId,
-      ingredientId: updatedIngredient.ingredientId,
-      notes: updatedIngredient.notes
+      id: response.data.ingredientId,
+      entryId: response.data.entryId,
+      ingredientId: response.data.ingredientId,
+      notes: response.data.notes
     })
   } catch (error) {
     console.error('Error updating entry ingredient notes:', error)
@@ -37,7 +49,12 @@ export async function DELETE(
     const entryId = parseInt((await params).entryId, 10)
     const ingredientId = parseInt((await params).ingredientId, 10)
     
-    await deleteEntryIngredient(entryId, ingredientId)
+    const response = await deleteEntryIngredient(entryId, ingredientId)
+    
+    if (response.error) {
+      return NextResponse.json({ error: response.error }, { status: 400 })
+    }
+    
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Error deleting entry ingredient:', error)

@@ -15,7 +15,7 @@ import { NotesModal } from "./NotesModal"
 interface DayViewProps {
   date: Date
   entry: Entry | undefined
-  onCreateEntry: (date: Date) => Promise<Entry>
+  onCreateEntry: (date: Date) => Promise<Entry | null>
 }
 
 const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
@@ -44,53 +44,111 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
   }, [entryIngredients, entrySymptoms, selectedItem])
 
   const handleAddIngredient = async (ingredient: Ingredient) => {
-    let currentEntry = entry
-    if (!currentEntry) {
-      currentEntry = await onCreateEntry(date)
+    // If no entry exists, try to create one
+    if (!entry) {
+      try {
+        const newEntry = await onCreateEntry(date)
+        if (!newEntry) {
+          // If entry creation failed, exit early
+          return
+        }
+      } catch (error) {
+        // Handle any errors from entry creation
+        console.debug('Error creating entry:', error)
+        return
+      }
     }
-    await addEntryIngredient({
-      ingredientId: ingredient.id,
-      notes: ""
-    })
-    setIngredientSearch("")
+    
+    // At this point, either entry already existed or we created a new one
+    try {
+      await addEntryIngredient({
+        ingredientId: ingredient.id,
+        notes: ""
+      })
+      setIngredientSearch("")
+    } catch (error) {
+      console.debug('Error adding ingredient:', error)
+    }
   }
 
   const handleAddNewIngredient = async (name: string) => {
-    const newIngredient = await addIngredient(name)
-    await handleAddIngredient(newIngredient)
+    try {
+      const newIngredient = await addIngredient(name)
+      await handleAddIngredient(newIngredient)
+    } catch (error) {
+      console.debug('Error adding new ingredient:', error)
+    }
   }
 
   const handleAddSymptom = async (symptom: Symptom) => {
-    let currentEntry = entry
-    if (!currentEntry) {
-      currentEntry = await onCreateEntry(date)
+    // If no entry exists, try to create one
+    if (!entry) {
+      try {
+        const newEntry = await onCreateEntry(date)
+        if (!newEntry) {
+          // If entry creation failed, exit early
+          return
+        }
+      } catch (error) {
+        // Handle any errors from entry creation
+        console.debug('Error creating entry:', error)
+        return
+      }
     }
-    await addEntrySymptom({
-      symptomId: symptom.id,
-      notes: ""
-    })
-    setSymptomSearch("")
+    
+    // At this point, either entry already existed or we created a new one
+    try {
+      await addEntrySymptom({
+        symptomId: symptom.id,
+        notes: ""
+      })
+      setSymptomSearch("")
+    } catch (error) {
+      console.debug('Error adding symptom:', error)
+    }
   }
 
   const handleAddNewSymptom = async (title: string) => {
-    const newSymptom = await addSymptom(title)
-    await handleAddSymptom(newSymptom)
+    try {
+      const newSymptom = await addSymptom(title)
+      await handleAddSymptom(newSymptom)
+    } catch (error) {
+      console.debug('Error adding new symptom:', error)
+    }
   }
 
   const handleAddSupplement = async (supplement: Supplement) => {
-    let currentEntry = entry
-    if (!currentEntry) {
-      currentEntry = await onCreateEntry(date)
+    // If no entry exists, try to create one
+    if (!entry) {
+      try {
+        const newEntry = await onCreateEntry(date)
+        if (!newEntry) {
+          // If entry creation failed, exit early
+          return
+        }
+      } catch (error) {
+        // Handle any errors from entry creation
+        console.debug('Error creating entry:', error)
+        return
+      }
     }
-    await addEntrySupplement({
-      supplementId: supplement.id
-    })
-    setSupplementSearch("")
+    
+    // At this point, either entry already existed or we created a new one
+    try {
+      await addEntrySupplement(supplement.id)
+      setSupplementSearch("")
+    } catch (error) {
+      console.debug('Error adding supplement:', error)
+    }
   }
 
   const handleAddNewSupplement = async (name: string) => {
-    const newSupplement = await addSupplement(name)
-    await handleAddSupplement(newSupplement)
+    try {
+      const newSupplement = await addSupplement(name)
+      await handleAddSupplement(newSupplement)
+    } catch (error) {
+      console.debug('Error adding new supplement:', error)
+    }
   }
 
   const handleSaveNotes = async (notes: string) => {
@@ -103,7 +161,8 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
         await updateSymptomNotes(selectedItem.id, notes)
       }
     } catch (error) {
-      console.error('Failed to update notes:', error)
+      // Error is already handled in the hooks
+      console.debug('Error caught in component:', error)
     }
   }
 
@@ -115,7 +174,14 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
         </h2>
         {!entry && (
           <button
-            onClick={() => onCreateEntry(date)}
+            onClick={async () => {
+              try {
+                await onCreateEntry(date);
+                // No need to handle the result here as the parent component will update the entry prop
+              } catch (error) {
+                console.debug('Error creating entry:', error);
+              }
+            }}
             className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
             Create Entry

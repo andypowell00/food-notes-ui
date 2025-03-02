@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import type { Symptom } from '@/types'
 import * as api from '@/lib/api'
+import { handleError } from '@/lib/errorHandling'
 
 export function useSymptoms() {
   const [symptoms, setSymptoms] = useState<Symptom[]>([])
@@ -14,12 +15,17 @@ export function useSymptoms() {
     const loadSymptoms = async () => {
       setIsLoading(true)
       try {
-        const data = await api.getSymptoms()
-        setSymptoms(data)
+        const response = await api.getSymptoms()
+        if (response.error) {
+          setError('Failed to load symptoms')
+          handleError(response.error, 'Failed to load symptoms')
+          return
+        }
+        setSymptoms(response.data || [])
         setError(null)
       } catch (err) {
         setError('Failed to load symptoms')
-        console.error('Error loading symptoms:', err)
+        handleError(err, 'Failed to load symptoms')
       } finally {
         setIsLoading(false)
       }
@@ -30,12 +36,24 @@ export function useSymptoms() {
 
   const addSymptom = async (title: string): Promise<Symptom> => {
     try {
-      const newSymptom = await api.createSymptom(title)
+      const response = await api.createSymptom(title)
+      if (response.error) {
+        handleError(response.error, 'Failed to add symptom')
+        // Return a default symptom to avoid breaking the UI
+        return { id: -1, title: title }
+      }
+      const newSymptom = response.data
+      if (!newSymptom) {
+        handleError(new Error('No data returned'), 'Failed to add symptom')
+        // Return a default symptom to avoid breaking the UI
+        return { id: -1, title: title }
+      }
       setSymptoms(prev => [...prev, newSymptom])
       return newSymptom
     } catch (err) {
-      console.error('Error adding symptom:', err)
-      throw new Error('Failed to add symptom')
+      handleError(err, 'Failed to add symptom')
+      // Return a default symptom to avoid breaking the UI
+      return { id: -1, title: title }
     }
   }
 

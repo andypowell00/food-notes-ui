@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import * as api from '@/lib/api'
 import type { EntryIngredient } from '@/types'
-import { fetchWithApiKey, API_BASE_URL } from '@/lib/api'
+import { handleError } from '@/lib/errorHandling'
 
 export function useEntryIngredients(entryId?: number) {
   const [entryIngredients, setEntryIngredients] = useState<EntryIngredient[]>([])
@@ -18,33 +18,19 @@ export function useEntryIngredients(entryId?: number) {
       setError(null)
 
       try {
-        const response = await fetchWithApiKey(`${API_BASE_URL}/entry-ingredients/by-entry/${entryId}`)
+        const response = await api.getEntryIngredients(entryId)
         
-        // Check if response is ok
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('Error response text:', errorText)
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-        }
-
-        // If response is empty or 204, set empty array
-        if (response.status === 204 || response.headers.get('content-length') === '0') {
+        if (response.error) {
+          setError('Failed to load ingredients')
+          handleError(response.error, 'Failed to load ingredients')
           setEntryIngredients([])
           return
         }
 
-        // Try to parse JSON, with fallback
-        try {
-          const data = await response.json()
-          setEntryIngredients(data)
-        } catch (jsonError) {
-          console.warn('Response is not valid JSON, setting empty array', jsonError)
-          setEntryIngredients([])
-        }
+        setEntryIngredients(response.data || [])
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load entry ingredients'
-        setError(errorMessage)
-        console.error(errorMessage)
+        setError('Failed to load ingredients')
+        handleError(err, 'Failed to load ingredients')
       } finally {
         setIsLoading(false)
       }
@@ -57,12 +43,18 @@ export function useEntryIngredients(entryId?: number) {
     if (!entryId) return
 
     try {
-      await api.addEntryIngredient(entryId, ingredientId, notes)
+      const response = await api.addEntryIngredient(entryId, ingredientId, notes)
+      if (response.error) {
+        handleError(response.error, 'Failed to add ingredient')
+        setError('Failed to add ingredient')
+        return
+      }
+      
       setEntryIngredients(prev => [...prev, { entryId, ingredientId, notes }])
+      setError(null)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add ingredient to entry'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      handleError(err, 'Failed to add ingredient')
+      setError('Failed to add ingredient')
     }
   }
 
@@ -70,12 +62,18 @@ export function useEntryIngredients(entryId?: number) {
     if (!entryId) return
 
     try {
-      await api.deleteEntryIngredient(entryId, ingredientId)
+      const response = await api.deleteEntryIngredient(entryId, ingredientId)
+      if (response.error) {
+        handleError(response.error, 'Failed to remove ingredient')
+        setError('Failed to remove ingredient')
+        return
+      }
+      
       setEntryIngredients(prev => prev.filter(ei => ei.ingredientId !== ingredientId))
+      setError(null)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to remove ingredient from entry'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      handleError(err, 'Failed to remove ingredient')
+      setError('Failed to remove ingredient')
     }
   }
 
@@ -83,41 +81,22 @@ export function useEntryIngredients(entryId?: number) {
     if (!entryId) return
 
     try {
-      const response = await fetchWithApiKey(`${API_BASE_URL}/entry-ingredients/${entryId}/${ingredientId}`, {
-        method: 'PUT',
-        body: JSON.stringify({ notes })
-      })
-
-      // Check if response is ok
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Error response text:', errorText)
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      // If response is a 204 No Content or similar, just update local state
-      if (response.status === 204 || response.headers.get('content-length') === '0') {
-        setEntryIngredients(prev => prev.map(ei => 
-          ei.ingredientId === ingredientId 
-            ? { ...ei, notes } 
-            : ei
-        ))
+      const response = await api.updateEntryIngredientNotes(entryId, ingredientId, notes)
+      if (response.error) {
+        handleError(response.error, 'Failed to update notes')
+        setError('Failed to update notes')
         return
       }
-
-      // Update local state directly
+      
       setEntryIngredients(prev => prev.map(ei => 
         ei.ingredientId === ingredientId 
           ? { ...ei, notes } 
           : ei
       ))
-
-      return
+      setError(null)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update ingredient notes'
-      console.error('Full error:', err)
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      handleError(err, 'Failed to update notes')
+      setError('Failed to update notes')
     }
   }
 
