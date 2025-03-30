@@ -32,14 +32,20 @@ export function Autocomplete<T>({
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Filter items based on search term
-  const filteredItems = items.filter(item => 
-    getItemText(item).toLowerCase().includes(value.toLowerCase())
-  )
+  const filteredItems = items.filter(item => {
+    const itemText = getItemText(item)
+    return itemText && value 
+      ? itemText.toLowerCase().includes(value.toLowerCase()) 
+      : false
+  })
 
-  const showAddNew = value.trim() !== '' && 
-    !filteredItems.some(item => 
-      getItemText(item).toLowerCase() === value.toLowerCase()
-    )
+  const showAddNew = value && value.trim() !== '' && 
+    !filteredItems.some(item => {
+      const itemText = getItemText(item)
+      return itemText && value 
+        ? itemText.toLowerCase() === value.toLowerCase() 
+        : false
+    })
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
