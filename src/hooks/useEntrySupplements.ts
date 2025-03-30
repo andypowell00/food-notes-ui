@@ -50,7 +50,24 @@ export function useEntrySupplements(entryId?: number) {
         return
       }
 
-      setEntrySupplements(prev => [...prev, { entryId, supplementId }])
+      let supplementData: EntrySupplement
+      
+      if (response.data && response.data.supplementName) {
+        supplementData = response.data
+      } else {
+        const supplementInfo = await api.getSupplement(supplementId)
+        if (supplementInfo.data) {
+          supplementData = { 
+            entryId, 
+            supplementId, 
+            supplementName: supplementInfo.data.name 
+          }
+        } else {
+          supplementData = { entryId, supplementId }
+        }
+      }
+
+      setEntrySupplements(prev => [...prev, supplementData])
       setError(null)
     } catch (err) {
       setError('Failed to add supplement')

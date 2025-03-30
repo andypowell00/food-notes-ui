@@ -333,28 +333,52 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
               />
               <div className="space-y-2">
                 {entrySupplements?.map((es) => {
-                  const supplement = supplements.find((s) => s.id === es.supplementId)
-                  if (!supplement) return null
-                  return (
-                    <div
-                      key={es.supplementId}
-                      className="group flex items-center justify-between p-3 bg-dark-elevated rounded-lg"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="text-dark-primary">{supplement.name}</span>
+                  // Try to use the name directly from the API response if available
+                  if (es.supplementName || es.supplementTitle) {
+                    return (
+                      <div
+                        key={es.supplementId}
+                        className="group flex items-center justify-between p-3 bg-dark-elevated rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-dark-primary">{es.supplementName || es.supplementTitle}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => removeSupplement(es.supplementId)}
+                            className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => removeSupplement(es.supplementId)}
-                          className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+                    )
+                  } else {
+                    const supplement = supplements.find((s) => s.id === es.supplementId)
+                    if (!supplement) return null
+                    return (
+                      <div
+                        key={es.supplementId}
+                        className="group flex items-center justify-between p-3 bg-dark-elevated rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-dark-primary">{supplement.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => removeSupplement(es.supplementId)}
+                            className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )
+                    )
+                  }
                 })}
               </div>
             </div>
@@ -376,60 +400,116 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
               />
               <div className="space-y-2">
                 {entrySymptoms.map((es) => {
-                  const symptom = symptoms.find((s) => s.id === es.symptomId)
-                  if (!symptom) return null
-                  return (
-                    <div
-                      key={es.symptomId}
-                      className="group flex items-center justify-between p-3 bg-dark-elevated rounded-lg"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="text-dark-primary">{symptom.title}</span>
-                        {es.notes && (
-                          <svg 
-                            className="w-4 h-4 text-dark-secondary" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24"
+                  // Try to use the title directly from the API response if available
+                  if (es.symptomTitle) {
+                    return (
+                      <div
+                        key={es.symptomId}
+                        className="group flex items-center justify-between p-3 bg-dark-elevated rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-dark-primary">{es.symptomTitle}</span>
+                          {es.notes && (
+                            <svg 
+                              className="w-4 h-4 text-dark-secondary" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <title>Has notes</title>
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth="2" 
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
+                              />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() =>
+                              setSelectedItem({
+                                type: 'symptom',
+                                id: es.symptomId,
+                                notes: es.notes,
+                              })
+                            }
+                            className="p-1 text-dark-secondary hover:text-dark-primary transition-colors"
+                            title="Edit Notes"
                           >
-                            <title>Has notes</title>
-                            <path 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round" 
-                              strokeWidth="2" 
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
-                            />
-                          </svg>
-                        )}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => removeSymptom(es.symptomId)}
+                            className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
+                            title="Delete"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() =>
-                            setSelectedItem({
-                              type: 'symptom',
-                              id: es.symptomId,
-                              notes: es.notes,
-                            })
-                          }
-                          className="p-1 text-dark-secondary hover:text-dark-primary transition-colors"
-                          title="Edit Notes"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => removeSymptom(es.symptomId)}
-                          className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
-                          title="Delete"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+                    )
+                  } else {
+                    const symptom = symptoms.find((s) => s.id === es.symptomId)
+                    if (!symptom) return null
+                    return (
+                      <div
+                        key={es.symptomId}
+                        className="group flex items-center justify-between p-3 bg-dark-elevated rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-dark-primary">{symptom.title}</span>
+                          {es.notes && (
+                            <svg 
+                              className="w-4 h-4 text-dark-secondary" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <title>Has notes</title>
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth="2" 
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
+                              />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() =>
+                              setSelectedItem({
+                                type: 'symptom',
+                                id: es.symptomId,
+                                notes: es.notes,
+                              })
+                            }
+                            className="p-1 text-dark-secondary hover:text-dark-primary transition-colors"
+                            title="Edit Notes"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => removeSymptom(es.symptomId)}
+                            className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
+                            title="Delete"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )
+                    )
+                  }
                 })}
               </div>
             </div>

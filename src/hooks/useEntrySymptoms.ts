@@ -67,7 +67,40 @@ export function useEntrySymptoms(entryId?: number) {
         handleError(response.error, 'Failed to add symptom to entry')
         return
       }
-      setEntrySymptoms(prev => [...prev, { entryId, symptomId, notes }])
+      
+      // Find the symptom title from the response or from the symptoms list
+      let symptomData: EntrySymptom
+      
+      if (response.data && response.data.symptomTitle) {
+        // If API returned the new entry with title, use it directly
+        symptomData = response.data
+      } else {
+        // Otherwise try to find the symptom by ID from all symptoms
+        try {
+          const symptomsResponse = await api.getSymptoms()
+          const symptom = symptomsResponse.data?.find(s => s.id === symptomId)
+          
+          if (symptom) {
+            symptomData = { 
+              entryId, 
+              symptomId, 
+              notes,
+              symptomTitle: symptom.title 
+            }
+          } else {
+            // Fallback if we can't get the title
+            symptomData = { entryId, symptomId, notes }
+          }
+        } catch (error) {
+          // Fallback if API call fails
+          setError('Failed to add symptom to entry')
+          handleError(error, 'Failed to add symptom to entry')
+          
+          symptomData = { entryId, symptomId, notes }
+        }
+      }
+
+      setEntrySymptoms(prev => [...prev, symptomData])
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add symptom to entry'
       setError('Failed to add symptom to entry')

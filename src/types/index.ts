@@ -25,6 +25,7 @@ export interface EntrySymptom {
   entryId: number
   symptomId: number
   notes: string
+  symptomTitle?: string
 }
 
 export interface Supplement {
@@ -36,4 +37,5 @@ export interface EntrySupplement {
   entryId: number
   supplementId: number
   supplementName?: string
+  supplementTitle?: string
 }
