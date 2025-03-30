@@ -70,9 +70,11 @@ export function useSupplements() {
     }
   }
 
-  const filteredSupplements = supplements.filter(supplement => 
-    supplement.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredSupplements = supplements.filter(supplement => {
+    // Add null checks to prevent toLowerCase errors
+    if (!supplement || !supplement.name || !searchTerm) return false
+    return supplement.name.toLowerCase().includes(searchTerm.toLowerCase())
+  })
 
   return {
     supplements: filteredSupplements,

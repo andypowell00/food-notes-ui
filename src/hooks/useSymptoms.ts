@@ -57,9 +57,11 @@ export function useSymptoms() {
     }
   }
 
-  const filteredSymptoms = symptoms.filter(symptom =>
-    symptom.title.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredSymptoms = symptoms.filter(symptom => {
+    // Add null checks to prevent toLowerCase errors
+    if (!symptom || !symptom.title || !searchTerm) return false
+    return symptom.title.toLowerCase().includes(searchTerm.toLowerCase())
+  })
 
   return {
     symptoms,

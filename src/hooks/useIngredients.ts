@@ -53,9 +53,11 @@ export function useIngredients() {
     }
   }
 
-  const filteredIngredients = ingredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredIngredients = ingredients.filter(ingredient => {
+    // Add null checks to prevent toLowerCase errors
+    if (!ingredient || !ingredient.name || !searchTerm) return false
+    return ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
+  })
 
   return {
     ingredients,
