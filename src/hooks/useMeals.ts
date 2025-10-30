@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import * as api from '@/lib/api'
-import type { Meal, Ingredient } from '@/types'
+import type { Meal } from '@/types'
 import { handleError } from '@/lib/errorHandling'
 
 export function useMeals() {
