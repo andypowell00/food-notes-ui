@@ -308,7 +308,7 @@ export async function markIngredientAsUnsafe(ingredientId: number): Promise<{ da
 
 export async function removeUnsafeIngredient(ingredientId: number): Promise<{ data?: void; error?: string }> {
   const response = await fetchWithApiKey(`${API_BASE_URL}/unsafe-ingredients/${ingredientId}`, {
-    method: 'DELETE',
+    method: 'DELETE', 
   })
   return handleResponse(response)
 }
