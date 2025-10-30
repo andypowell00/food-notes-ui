@@ -1,0 +1,16 @@
+services:
+  nextjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000" # localhost:3001 → container:3000
+    volumes:
+      - .:/app
+      - /app/node_modules # prevent overwriting node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - NEXT_WEBPACK_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    command: npm run dev

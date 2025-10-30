@@ -1,4 +1,4 @@
-import type { Entry, Ingredient, Symptom, EntryIngredient, EntrySymptom, Supplement, EntrySupplement } from "@/types"
+import type { Entry, Ingredient, Symptom, EntryIngredient, EntrySymptom, Supplement, EntrySupplement, CreateMeal, Meal, EntryMeal } from "@/types"
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
@@ -72,6 +72,13 @@ export async function getEntryIngredients(entryId: number): Promise<{ data?: Ent
   return handleResponse(response)
 }
 
+import type { EntryMealDetail } from '@/types'
+
+export async function getEntryMeals(entryId: number): Promise<{ data?: EntryMealDetail[]; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/entrymeals/entry/${entryId}`)
+  return handleResponse(response)
+}
+
 export async function addEntryIngredient(
   entryId: number, 
   ingredientId: number, 
@@ -84,6 +91,23 @@ export async function addEntryIngredient(
       ingredientId, 
       notes 
     }),
+  })
+  return handleResponse(response)
+}
+
+export async function addEntryMeal(
+  createEntryMealDto : EntryMeal
+): Promise<{ data?: EntryMeal; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/entrymeals`, {
+    method: 'POST',
+    body: JSON.stringify(createEntryMealDto),
+  })
+  return handleResponse(response)
+}
+
+export async function deleteEntryMeal(entryId: number, mealId: number): Promise<{ data?: void; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/entrymeals/entry/${entryId}/meal/${mealId}`, {
+    method: 'DELETE',
   })
   return handleResponse(response)
 }
@@ -152,6 +176,47 @@ export async function createIngredient(name: string): Promise<{ data?: Ingredien
   })
   return handleResponse(response)
 }
+export async function createMeal(createmealDto: CreateMeal): Promise<{ data?: Meal; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/meals`, {
+    method: 'POST', 
+    body: JSON.stringify(createmealDto),
+  })
+  return handleResponse(response)
+}
+
+export async function getMeals(): Promise<{ data?: Meal[]; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/meals`)
+  return handleResponse(response)
+}
+
+export async function addMealIngredient(
+  id: number, // meal id
+  ingredientId: number
+): Promise<{ data?: void; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/meals/${id}/ingredients`, {
+    method: 'POST', 
+    body: JSON.stringify(ingredientId),
+  })
+  return handleResponse(response)
+}
+
+export async function deleteMealIngredient(
+  id: number, // meal id
+  ingredientId: number  
+): Promise<{ data?: void; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/meals/${id}/ingredients/${ingredientId}`, {
+    method: 'DELETE', 
+  })
+  return handleResponse(response)
+}
+
+export async function deleteMeal(id: number): Promise<{ data?: void; error?: string }> {
+  const response = await fetchWithApiKey(`${API_BASE_URL}/meals/${id}`, {
+    method: 'DELETE', 
+  })
+  return handleResponse(response)
+} 
+
 
 // Supplements API methods
 export async function getSupplements(): Promise<{ data?: Supplement[]; error?: string }> {

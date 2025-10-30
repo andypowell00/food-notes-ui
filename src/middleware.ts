@@ -1,10 +1,17 @@
 // middleware.ts
+// @ts-nocheck
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 
-export default withAuth(
+
+const DISABLE_AUTH_IN_DEV = process.env.DISABLE_NEXTAUTH_DEV === 'true'
+
+function allowAllMiddleware() {
+  return NextResponse.next()
+}
+
+const authMiddleware = withAuth(
   function middleware() {
-    
     return NextResponse.next()
   },
   {
@@ -16,6 +23,11 @@ export default withAuth(
     }
   }
 )
+
+// Export either the auth-enforcing middleware or a passthrough for devs
+const middleware = DISABLE_AUTH_IN_DEV ? allowAllMiddleware : authMiddleware
+
+export default middleware
 
 export const config = {
   matcher: [

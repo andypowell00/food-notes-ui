@@ -1,7 +1,7 @@
 'use client'
 
 import React from "react"
-import type { Entry, Ingredient, Symptom, Supplement } from "@/types"
+import type { Entry, Ingredient, Symptom, Supplement, Meal } from "@/types"
 import { useIngredients } from "@/hooks/useIngredients"
 import { useSymptoms } from "@/hooks/useSymptoms"
 import { useSupplements } from "@/hooks/useSupplements"
@@ -9,6 +9,8 @@ import { useSafeUnsafeIngredients } from "@/hooks/useSafeUnsafeIngredients"
 import { useEntryIngredients } from "@/hooks/useEntryIngredients"
 import { useEntrySymptoms } from "@/hooks/useEntrySymptoms"
 import { useEntrySupplements } from "@/hooks/useEntrySupplements"
+import { useMeals } from '@/hooks/useMeals'
+import { useEntryMeals } from '@/hooks/useEntryMeals'
 import { Autocomplete } from "./Autocomplete"
 import { NotesModal } from "./NotesModal"
 
@@ -26,6 +28,12 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
   const { entryIngredients, addIngredient: addEntryIngredient, removeIngredient, updateNotes: updateIngredientNotes } = useEntryIngredients(entry?.id)
   const { entrySymptoms, addSymptom: addEntrySymptom, removeSymptom, updateNotes: updateSymptomNotes } = useEntrySymptoms(entry?.id)
   const { entrySupplements, addSupplement: addEntrySupplement, removeSupplement } = useEntrySupplements(entry?.id)
+
+  const { meals, searchTerm: mealSearch, setSearchTerm: setMealSearch, addMeal, addIngredientToMeal, removeIngredientFromMeal } = useMeals()
+  const { entryMeals, addMealToEntry, removeMealFromEntry, reload: reloadEntryMeals } = useEntryMeals(entry?.id)
+
+  // per-meal autocomplete text value
+  const [selectedIngredientForMeal, setSelectedIngredientForMeal] = React.useState<Record<number, string>>({})
 
   const [selectedItem, setSelectedItem] = React.useState<{ type: 'ingredient' | 'symptom' | 'supplement', id: number, notes: string } | null>(null)
 
@@ -166,6 +174,13 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
     }
   }
 
+  // Track which meals are expanded (default: expanded)
+  const [expandedMeals, setExpandedMeals] = React.useState<Record<number, boolean>>({})
+
+  const toggleMealExpand = (mealId: number) => {
+    setExpandedMeals(prev => ({ ...prev, [mealId]: !prev[mealId] }))
+  }
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -193,7 +208,7 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
         <div className="space-y-8">
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-dark-primary">Food & Drink</h3>
+              <h3 className="text-lg font-medium text-dark-primary">Snacks & Drinks</h3>
             </div>
             <div className="space-y-4">
               <Autocomplete<Ingredient>
@@ -204,7 +219,7 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
                 onAddNew={handleAddNewIngredient}
                 items={ingredients}
                 getItemText={(item) => item.name}
-                placeholder="Add Food & Drink..."
+                placeholder="Add Snacks & Drinks..."
                 label="Ingredient"
                 hideLabel={true}
               />
@@ -310,6 +325,162 @@ const DayView: React.FC<DayViewProps> = ({ date, entry, onCreateEntry }) => {
                           </svg>
                         </button>
                       </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+          <section>
+            <h3 className="text-lg font-medium text-dark-primary mb-4">Meals</h3>
+            <div className="space-y-4">
+              <Autocomplete<Meal>
+                id="meal-search"
+                value={mealSearch}
+                onChange={setMealSearch}
+                onSelect={async (meal) => {
+                  try {
+                    // If no entry exists, create one
+                    if (!entry) {
+                      const newEntry = await onCreateEntry(date)
+                      if (!newEntry) return
+                    }
+                    await addMealToEntry(meal.id)
+                    setMealSearch('')
+                  } catch (err) {
+                    console.debug('Error adding meal to entry:', err)
+                  }
+                }}
+                onAddNew={async (name) => {
+                  try {
+                    const newMeal = await addMeal(name)
+                    // If no entry exists, create one
+                    if (!entry) {
+                      const newEntry = await onCreateEntry(date)
+                      if (!newEntry) return
+                    }
+                    await addMealToEntry(newMeal.id)
+                    setMealSearch('')
+                  } catch (err) {
+                    console.debug('Error creating/adding meal:', err)
+                  }
+                }}
+                items={meals}
+                getItemText={(item) => item.name}
+                placeholder="Add Meal..."
+                label="Meal"
+                hideLabel={true}
+              />
+
+              <div className="space-y-2">
+                {entryMeals?.map((em) => {
+                  const mealId = em.mealId
+                  const mealName = em.mealName || `Meal ${mealId}`
+                  const mealIngredientsNames: string[] = em.ingredients || []
+                  // default collapsed: only expanded when explicitly set to true
+                  const isExpanded = expandedMeals[mealId] === true
+
+                  return (
+                    <div key={mealId} className="group p-3 bg-dark-elevated rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => toggleMealExpand(mealId)}
+                            className="p-1 text-dark-secondary hover:text-dark-primary focus:outline-none"
+                            title={isExpanded ? 'Hide ingredients' : 'Show ingredients'}
+                          >
+                            {isExpanded ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+                            )}
+                          </button>
+                          <span className="text-dark-primary font-medium">{mealName}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => removeMealFromEntry(mealId)}
+                            className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
+                            title="Remove meal from entry"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="mt-3">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Autocomplete<Ingredient>
+                              id={`meal-${mealId}-ingredient-search`}
+                              value={selectedIngredientForMeal[mealId] ?? ''}
+                              onChange={(v) => setSelectedIngredientForMeal(prev => ({ ...prev, [mealId]: v }))}
+                              onSelect={async (ingredient) => {
+                                try {
+                                  await addIngredientToMeal(mealId, ingredient.id)
+                                  if (reloadEntryMeals) await reloadEntryMeals()
+                                } catch (err) {
+                                  console.debug('Error adding ingredient to meal:', err)
+                                } finally {
+                                  setSelectedIngredientForMeal(prev => ({ ...prev, [mealId]: '' }))
+                                }
+                              }}
+                              onAddNew={async (name) => {
+                                try {
+                                  const newIngredient = await addIngredient(name)
+                                  await addIngredientToMeal(mealId, newIngredient.id)
+                                  if (reloadEntryMeals) await reloadEntryMeals()
+                                } catch (err) {
+                                  console.debug('Error creating/adding ingredient to meal:', err)
+                                } finally {
+                                  setSelectedIngredientForMeal(prev => ({ ...prev, [mealId]: '' }))
+                                }
+                              }}
+                              items={ingredients}
+                              getItemText={(item) => item.name}
+                              placeholder="Add ingredient..."
+                              label="Ingredient"
+                              hideLabel={true}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            {mealIngredientsNames.length === 0 && (
+                              <div className="text-dark-secondary italic">No ingredients yet.</div>
+                            )}
+                            {mealIngredientsNames.map((ingName) => (
+                              <div key={ingName} className="flex items-center justify-between p-2 bg-dark-elevated rounded">
+                                <div className="text-dark-primary">{ingName}</div>
+                                <div>
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        // find ingredient id by name
+                                        const ingObj = ingredients.find(i => i.name === ingName)
+                                        if (!ingObj) {
+                                          console.warn('Cannot remove ingredient by name - id not found:', ingName)
+                                          return
+                                        }
+                                        await removeIngredientFromMeal(mealId, ingObj.id)
+                                        if (reloadEntryMeals) await reloadEntryMeals()
+                                      } catch (err) {
+                                        console.debug('Error removing ingredient from meal:', err)
+                                      }
+                                    }}
+                                    className="p-1 text-dark-secondary hover:text-red-400 transition-colors"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })}

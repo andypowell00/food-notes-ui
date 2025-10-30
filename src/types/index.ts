@@ -39,3 +39,38 @@ export interface EntrySupplement {
   supplementName?: string
   supplementTitle?: string
 }
+
+export interface Meal {
+  id: number
+  name: string
+  ingredients: Ingredient[]
+}
+
+export interface CreateMeal {
+  name: string
+  ingredientIds: number[]
+}
+
+export interface UpdateMeal {
+  id: number
+  name?: string
+  ingredientIds?: number[]
+}
+
+export interface EntryMeal {
+  entryId: number
+  mealId: number
+}
+
+export interface MealIngredient {
+  mealId: number
+  ingredientId: number
+  ingredientName: string
+}
+
+export interface EntryMealDetail {
+  id: number
+  mealId: number
+  mealName: string
+  ingredients: string[]
+}
