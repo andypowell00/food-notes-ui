@@ -33,7 +33,8 @@ export function useMeals() {
                     return { ...meal, ingredients: found.ingredients }
                   }
                 } catch (e) {
-                  // fallback: just return meal as-is
+                  setError('Failed to load meals')
+                  handleError(e, 'Failed to load meals')
                 }
               }
               return meal
